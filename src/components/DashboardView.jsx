@@ -2,12 +2,15 @@ import { useMemo } from 'react'
 import { useSyncExternalStore } from 'react'
 import { todayKey } from '../lib/dates.js'
 import { reasonText, templateExplanation } from '../lib/explain.js'
+import { computeMetrics } from '../lib/metrics.js'
 import { scoreAllItems } from '../lib/ranking.js'
+import { recommendAll } from '../lib/recommend.js'
 
-// Module 3 — Use Soon list + explanations (FR-02, FR-03, FR-10).
-// Scores, bands, and confidence come from the Module 1 engine; this view
-// only renders them. Shopping recommendations (FR-05) stay in Module 4 and
-// dashboard metrics (FR-06) in Module 5.
+// Modules 3 + 5 — Use Soon list + explanations (FR-02, FR-03, FR-10) and
+// dashboard metrics (FR-06). Scores, bands, and confidence come from the
+// Module 1 engine; recommendations from Module 4; this view only renders
+// them. Recorded totals come from events, projections from scores — the
+// two are kept separate (FR-06).
 
 function expiryText(entry) {
   if (entry.expiryConfidence === 'Known') return `Expires ${entry.expiryDate}`
@@ -62,6 +65,20 @@ export default function DashboardView({ store }) {
     () => scoreAllItems(state.items, state.events, today),
     [state, today],
   )
+  const recommendations = useMemo(
+    () => recommendAll(state.shoppingList, state.items, state.events, today),
+    [state, today],
+  )
+  const metrics = useMemo(
+    () =>
+      computeMetrics({
+        items: state.items,
+        events: state.events,
+        ranked: result.ranked,
+        recommendations,
+      }),
+    [state, result, recommendations],
+  )
 
   if (state.items.length === 0) {
     return (
@@ -77,6 +94,93 @@ export default function DashboardView({ store }) {
 
   return (
     <div>
+      <section className="card">
+        <h2>At a glance</h2>
+        <div className="metrics">
+          <div className="metric-card">
+            <div className="metric-value">{metrics.activeCount}</div>
+            <div className="metric-label">Active items</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-value">{metrics.attentionCount}</div>
+            <div className="metric-label">Needing attention (score ≥ 40)</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-value">{metrics.duplicateAlertCount}</div>
+            <div className="metric-label">Duplicate alerts</div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-value">{metrics.consumedTotal}</div>
+            <div className="metric-label">
+              Recorded consumed ({metrics.consumedEventCount} records)
+            </div>
+          </div>
+          <div className="metric-card">
+            <div className="metric-value">{metrics.discardedTotal}</div>
+            <div className="metric-label">
+              Recorded discarded ({metrics.discardedEventCount} records)
+            </div>
+          </div>
+        </div>
+        <p className="hint">
+          Recorded totals come from logged events; Use Soon and ranked
+          lists are projections from scores. The two are kept separate
+          (FR-06).
+        </p>
+      </section>
+
+      <section className="card">
+        <h2>Top 3 Use Soon</h2>
+        {result.useSoon.length === 0 ? (
+          <p className="hint">Nothing urgent right now.</p>
+        ) : (
+          <ul className="item-list">
+            {result.useSoon.slice(0, 3).map((entry) => (
+              <li key={entry.itemId} className="item-row">
+                <div>
+                  <div className="item-name">
+                    {entry.item.name}
+                    <span className={bandClass(entry.band)}>
+                      {entry.band} · {entry.riskScore}
+                    </span>
+                  </div>
+                  <div className="item-meta">
+                    {entry.item.quantityRemaining} {entry.item.unit} ·{' '}
+                    {expiryText(entry)} · {entry.confidence}
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {metrics.duplicateAlerts.length > 0 && (
+        <section className="card">
+          <h2>Duplicate alerts ({metrics.duplicateAlertCount})</h2>
+          <p className="hint">
+            Shopping-list items that duplicate something already in
+            inventory.
+          </p>
+          <ul className="item-list">
+            {metrics.duplicateAlerts.map(({ listItem, recommendation }) => (
+              <li key={listItem.id} className="item-row">
+                <div>
+                  <div className="item-name">
+                    {listItem.name} — {recommendation.label}
+                  </div>
+                  <div className="item-meta">
+                    Matches {recommendation.matchedItem.name} (
+                    {recommendation.matchedItem.quantityRemaining}{' '}
+                    {recommendation.matchedItem.unit} in inventory)
+                  </div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
       <section className="card">
         <h2>Use Soon ({result.useSoon.length})</h2>
         {result.useSoon.length === 0 ? (
