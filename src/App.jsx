@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import DashboardView from './components/DashboardView.jsx'
 import InventoryView from './components/InventoryView.jsx'
 import { store } from './lib/storeInstance.js'
 
@@ -40,6 +41,8 @@ export default function App() {
       <main className="main">
         {view === 'inventory' ? (
           <InventoryView store={store} />
+        ) : view === 'dashboard' ? (
+          <DashboardView store={store} />
         ) : (
           <section className="card">
             <h2>{current.label}</h2>
