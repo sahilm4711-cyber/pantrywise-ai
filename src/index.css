@@ -65,3 +65,95 @@ body {
 .card h2 {
   margin-top: 0;
 }
+
+/* Module 2 — inventory form and list. */
+.form {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.field label {
+  display: block;
+  font-weight: 600;
+}
+
+.field input,
+.field select {
+  width: 100%;
+  padding: 0.45rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 1rem;
+  margin-top: 0.25rem;
+}
+
+.field-error {
+  color: #b00020;
+  font-size: 0.9rem;
+  margin-top: 0.2rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn {
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.45rem 0.9rem;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary {
+  background: #1a1a1a;
+  color: #fff;
+  border-color: #1a1a1a;
+}
+
+.btn-danger {
+  color: #b00020;
+  border-color: #e0a8b0;
+}
+
+.hint {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.item-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.item-row {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.item-name {
+  font-weight: 700;
+}
+
+.item-meta {
+  color: #555;
+  font-size: 0.95rem;
+}
+
+.item-actions {
+  display: flex;
+  gap: 0.4rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
