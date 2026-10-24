@@ -40,21 +40,25 @@ npm run preview  # serve the production build
 
 Requires Node 20.19+ (the team runs Node 24).
 
+Demo walkthrough for the judges: see **DEMO.md**.
+
 ## Build order (Module 0 → 6)
 
-1. **Module 0 — Foundation** (this shell): runnable app, shared repo,
+1. **Module 0 — Foundation** (done): runnable app, shared repo,
    layout + navigation.
-2. **Module 1 — Risk-scoring engine**: pure-JS scorer + tests (Milk = 84,
-   urgency bands, zero-quantity unscored, insufficient-data state).
-3. **Module 2 — Inventory + persistence**: CRUD, validation, localStorage,
-   FR-07 demo seed + reset.
-4. **Module 3 — Use Soon + explanations**: sorted risk list, bands,
-   contributing factors, provenance labels.
-5. **Module 4 — Duplicate detection**: normalization, aliases, fuzzy
-   matching (≥ 0.85), shopping-list warnings.
-6. **Module 5 — Dashboard + recommendations**: metrics, rule-based
+2. **Module 1 — Risk-scoring engine** (done): pure-JS scorer + tests
+   (Milk = 84, urgency bands, zero-quantity unscored, insufficient-data
+   state).
+3. **Module 2 — Inventory + persistence** (done): CRUD, validation,
+   localStorage, FR-07 demo seed + reset.
+4. **Module 3 — Use Soon + explanations** (done): sorted risk list,
+   bands, contributing factors, provenance labels.
+5. **Module 4 — Duplicate detection** (done): normalization, aliases,
+   fuzzy matching (≥ 0.85), shopping-list warnings.
+6. **Module 5 — Dashboard + recommendations** (done): metrics, rule-based
    recommendations with reason codes.
-7. **Module 6 — Demo polish**: styling, empty states, final demo path.
+7. **Module 6 — Demo polish** (done): demo-data labelling, damaged-data
+   banner, end-to-end flow test, DEMO.md walkthrough, P0 verification.
 
 A module is done only when its PRD acceptance criteria pass. Report actual
 test results, including failures — never claim a feature works unverified.

@@ -40,6 +40,12 @@ export default function App() {
       </header>
 
       <main className="main">
+        {store.wasCorrupted() && (
+          <section className="card banner">
+            <strong>Saved data was damaged</strong> — the app started with
+            an empty inventory. Load demo data or add items to begin.
+          </section>
+        )}
         {view === 'inventory' ? (
           <InventoryView store={store} />
         ) : view === 'dashboard' ? (

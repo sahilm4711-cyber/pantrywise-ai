@@ -267,3 +267,9 @@ body {
   border-radius: 6px;
   font-size: 1rem;
 }
+
+/* Module 6 — damaged-data banner. */
+.banner {
+  background: #fef3c7;
+  border-color: #f59e0b;
+}
