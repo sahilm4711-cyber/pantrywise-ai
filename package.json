@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --test src/lib/riskEngine.test.js src/lib/store.test.js src/lib/seed.test.js"
+    "test": "node --test src/lib/riskEngine.test.js src/lib/store.test.js src/lib/seed.test.js src/lib/ranking.test.js src/lib/explain.test.js"
   },
   "dependencies": {
     "react": "^19.3.1",
