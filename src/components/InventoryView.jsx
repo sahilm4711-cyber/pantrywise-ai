@@ -31,6 +31,48 @@ function expiryText(item) {
     : `Expires ${resolved.expiryDate} (estimated)`
 }
 
+// Module 5 — per-item consumption logging. This completes the Module 2
+// event loop in the UI: logging Used/Discarded here is what moves the
+// FR-06 dashboard metrics (and feeds FR-09 learning for consumed events).
+// The row remounts on quantity change (key below), so the input resets to
+// the new remaining amount after each log.
+function LogControl({ store, item }) {
+  const [qty, setQty] = useState(String(item.quantityRemaining))
+  const [error, setError] = useState('')
+  function log(eventType) {
+    const result = store.logEvent({
+      itemId: item.id,
+      eventType,
+      quantity: Number(qty),
+    })
+    if (!result.ok) {
+      setError(result.error)
+      return
+    }
+    setError('')
+  }
+  return (
+    <div className="log-row">
+      <input
+        type="number"
+        step="any"
+        min="0"
+        value={qty}
+        onChange={(e) => setQty(e.target.value)}
+        aria-label={`Quantity to log for ${item.name}`}
+      />
+      <span className="hint">{item.unit}</span>
+      <button type="button" className="btn" onClick={() => log('consumed')}>
+        Used
+      </button>
+      <button type="button" className="btn" onClick={() => log('discarded')}>
+        Discarded
+      </button>
+      {error && <span className="field-error">{error}</span>}
+    </div>
+  )
+}
+
 function Field({ label, error, children }) {
   return (
     <div className="field">
@@ -245,6 +287,13 @@ export default function InventoryView({ store }) {
                     {expiryText(item)} ·{' '}
                     {STATUS_LABELS[item.status] ?? item.status}
                   </div>
+                  {item.quantityRemaining > 0 && (
+                    <LogControl
+                      key={`${item.id}-${item.quantityRemaining}`}
+                      store={store}
+                      item={item}
+                    />
+                  )}
                 </div>
                 <div className="item-actions">
                   <button
