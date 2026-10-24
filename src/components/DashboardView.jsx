@@ -24,17 +24,15 @@ function bandClass(band) {
   return `badge badge-${band.toLowerCase()}`
 }
 
+// Styling pass — the score is the hero: a large numeral plus a
+// band-colored urgency bar, instead of the small badge the ranked rows
+// still use. Presentational only; scores and bands are unchanged.
 function UseSoonCard({ entry }) {
   const { item } = entry
   return (
-    <li className="item-row">
-      <div>
-        <div className="item-name">
-          {item.name}
-          <span className={bandClass(entry.band)}>
-            {entry.band} · {entry.riskScore}
-          </span>
-        </div>
+    <li className="item-row use-soon-card">
+      <div className="use-soon-body">
+        <div className="item-name">{item.name}</div>
         <div className="item-meta">
           {item.quantityRemaining} {item.unit} · {expiryText(entry)} ·{' '}
           {entry.confidence}
@@ -47,6 +45,18 @@ function UseSoonCard({ entry }) {
           ))}
         </div>
         <p className="explanation">{templateExplanation(entry)}</p>
+      </div>
+      <div className="score-hero">
+        <span className="score-number">{entry.riskScore}</span>
+        <span className={`score-band score-${entry.band.toLowerCase()}`}>
+          {entry.band}
+        </span>
+      </div>
+      <div className="urgency-bar">
+        <span
+          className={`urgency-fill urgency-${entry.band.toLowerCase()}`}
+          style={{ width: `${entry.riskScore}%` }}
+        />
       </div>
     </li>
   )
@@ -101,7 +111,7 @@ export default function DashboardView({ store }) {
             <div className="metric-value">{metrics.activeCount}</div>
             <div className="metric-label">Active items</div>
           </div>
-          <div className="metric-card">
+          <div className="metric-card metric-accent">
             <div className="metric-value">{metrics.attentionCount}</div>
             <div className="metric-label">Needing attention (score ≥ 40)</div>
           </div>
@@ -136,7 +146,10 @@ export default function DashboardView({ store }) {
         ) : (
           <ul className="item-list">
             {result.useSoon.slice(0, 3).map((entry) => (
-              <li key={entry.itemId} className="item-row">
+              <li
+                key={entry.itemId}
+                className={`item-row top3-row top3-${entry.band.toLowerCase()}`}
+              >
                 <div>
                   <div className="item-name">
                     {entry.item.name}
