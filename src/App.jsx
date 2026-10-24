@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import DashboardView from './components/DashboardView.jsx'
 import InventoryView from './components/InventoryView.jsx'
+import ShoppingView from './components/ShoppingView.jsx'
 import { store } from './lib/storeInstance.js'
 
 const VIEWS = [
@@ -43,6 +44,8 @@ export default function App() {
           <InventoryView store={store} />
         ) : view === 'dashboard' ? (
           <DashboardView store={store} />
+        ) : view === 'shopping' ? (
+          <ShoppingView store={store} />
         ) : (
           <section className="card">
             <h2>{current.label}</h2>

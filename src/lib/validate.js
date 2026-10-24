@@ -88,3 +88,23 @@ export function validateItemInput(input) {
     },
   }
 }
+
+
+// Shopping-list validation (FR-04/FR-05): a list item needs a name, a
+// wanted quantity > 0, and a unit. No dates — those live on inventory.
+export function validateShoppingItemInput(input) {
+  const errors = {}
+  const name = cleanString(input.name)
+  const unit = cleanString(input.unit)
+  const quantityWanted = toNumber(input.quantityWanted)
+  if (name === '') errors.name = 'Name is required.'
+  if (unit === '') errors.unit = 'Unit is required.'
+  if (!Number.isFinite(quantityWanted) || quantityWanted <= 0) {
+    errors.quantityWanted = 'Quantity must be a number greater than 0.'
+  }
+  return {
+    valid: Object.keys(errors).length === 0,
+    errors,
+    value: { name, quantityWanted, unit },
+  }
+}

@@ -20,7 +20,10 @@
 
 import { formatDay, isDateLike, toDayMs, todayKey } from './dates.js'
 import { buildSeed } from './seed.js'
-import { validateItemInput } from './validate.js'
+import {
+  validateItemInput,
+  validateShoppingItemInput,
+} from './validate.js'
 
 export const STORAGE_KEY = 'pantrywise-ai-v1'
 export const SCHEMA_VERSION = 1
@@ -237,6 +240,48 @@ export function createStore(storage = defaultStorage()) {
       }
       setState({ ...state, items: [...state.items, item] })
       return { ok: true, item }
+    },
+
+    addShoppingItem(input) {
+      const { valid, errors, value } = validateShoppingItemInput(input)
+      if (!valid) return { ok: false, errors }
+      const item = {
+        id: generateId(),
+        name: value.name,
+        quantityWanted: value.quantityWanted,
+        unit: value.unit,
+      }
+      setState({ ...state, shoppingList: [...state.shoppingList, item] })
+      return { ok: true, item }
+    },
+
+    updateShoppingItem(id, patch) {
+      const existing = state.shoppingList.find((it) => it.id === id)
+      if (!existing) return { ok: false, error: 'List item not found.' }
+      const { valid, errors, value } = validateShoppingItemInput({
+        ...existing,
+        ...patch,
+      })
+      if (!valid) return { ok: false, errors }
+      const item = { ...existing, ...value }
+      setState({
+        ...state,
+        shoppingList: state.shoppingList.map((it) =>
+          it.id === id ? item : it,
+        ),
+      })
+      return { ok: true, item }
+    },
+
+    deleteShoppingItem(id) {
+      if (!state.shoppingList.some((it) => it.id === id)) {
+        return { ok: false, error: 'List item not found.' }
+      }
+      setState({
+        ...state,
+        shoppingList: state.shoppingList.filter((it) => it.id !== id),
+      })
+      return { ok: true }
     },
 
     seedDemo(today = todayKey()) {
