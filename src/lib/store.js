@@ -75,6 +75,11 @@ function emptyState() {
     items: [],
     events: [],
     shoppingList: [],
+    // True when the current dataset originated as the FR-07 demo seed
+    // (Module 6: the seed is labelled "Synthetic demo data" in the UI).
+    // Cleared only by clearAll; manual edits keep the label, since the
+    // dataset is still the demo one, edited.
+    demo: false,
   }
 }
 
@@ -98,6 +103,15 @@ function loadFrom(storage) {
         items: parsed.items,
         events: parsed.events,
         shoppingList: parsed.shoppingList,
+        // States saved before the flag existed are recognised by the
+        // seed items' id prefix (manual items get random UUIDs, never
+        // "seed-"), so the label survives the upgrade.
+        demo:
+          parsed.demo === true ||
+          (parsed.demo === undefined &&
+            parsed.items.some(
+              (it) => typeof it.id === 'string' && it.id.startsWith('seed-'),
+            )),
       },
       corrupted: false,
     }
@@ -291,6 +305,7 @@ export function createStore(storage = defaultStorage()) {
         items: seed.items,
         events: seed.events,
         shoppingList: seed.shoppingList,
+        demo: true,
       })
       return state
     },

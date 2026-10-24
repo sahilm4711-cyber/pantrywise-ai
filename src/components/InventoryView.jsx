@@ -263,6 +263,9 @@ export default function InventoryView({ store }) {
 
       <section className="card">
         <h2>Inventory ({state.items.length} items)</h2>
+        {state.demo && (
+          <p className="hint">Synthetic demo data (FR-07).</p>
+        )}
         <div className="form-row">
           <button type="button" className="btn" onClick={handleSeed}>
             Load demo data

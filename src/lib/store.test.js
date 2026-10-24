@@ -186,3 +186,10 @@ test('seedDemo replaces the current inventory with the demo dataset', () => {
   assert.equal(store.getState().items.length, 40)
   assert.equal(store.getState().shoppingList.length, 5)
 })
+
+test('demo flag: fresh stores are not demo, seedDemo marks demo', () => {
+  const store = createStore(createMemoryStorage())
+  assert.equal(store.getState().demo, false)
+  store.seedDemo('2026-10-24')
+  assert.equal(store.getState().demo, true)
+})
