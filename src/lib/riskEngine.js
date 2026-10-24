@@ -27,54 +27,26 @@
 // - Confidence labels are FR-10 (P1), implemented early because they are a
 //   pure function of provenance the scorer already resolves.
 
+import {
+  DAY_MS,
+  addDays,
+  daysBetween,
+  formatDay,
+  isDateLike,
+  toDayMs,
+  todayKey,
+} from './dates.js'
 import { getShelfLifePrior } from './priors.js'
+
+// Date helpers moved to dates.js in Module 2; daysBetween is re-exported so
+// the engine's public API (and Module 1's tests) keep working unchanged.
+export { daysBetween }
 
 export const URGENCY_WEIGHT = 0.6
 export const EXCESS_WEIGHT = 0.4
 export const HIGH_THRESHOLD = 70
 export const MEDIUM_THRESHOLD = 40
 export const MIN_LEARNING_EVENTS = 3
-
-const DAY_MS = 24 * 60 * 60 * 1000
-
-function toDayMs(value) {
-  if (value instanceof Date) {
-    if (Number.isNaN(value.getTime())) return Number.NaN
-    return Date.UTC(
-      value.getUTCFullYear(),
-      value.getUTCMonth(),
-      value.getUTCDate(),
-    )
-  }
-  if (typeof value === 'string') {
-    const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(value)
-    if (!m) return Number.NaN
-    return Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]))
-  }
-  return Number.NaN
-}
-
-function isDateLike(value) {
-  return !Number.isNaN(toDayMs(value))
-}
-
-function formatDay(ms) {
-  return new Date(ms).toISOString().slice(0, 10)
-}
-
-function todayKey() {
-  const now = new Date()
-  return formatDay(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()))
-}
-
-/** Calendar days from `from` to `to` (to − from). */
-export function daysBetween(from, to) {
-  return Math.round((toDayMs(to) - toDayMs(from)) / DAY_MS)
-}
-
-function addDays(dateValue, days) {
-  return formatDay(toDayMs(dateValue) + days * DAY_MS)
-}
 
 /** Urgency score U from the §6.1 piecewise table. */
 export function urgencyFor(daysLeft) {
