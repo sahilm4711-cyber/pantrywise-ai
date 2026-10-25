@@ -38,3 +38,34 @@ export function computeInsights(events) {
     byCategory,
   }
 }
+
+// FR-15 (P2): per-member activity. Member names are snapshotted on
+// events, so history survives renames and removals; members with no
+// events still appear with zeros.
+export function computeMemberStats(events, members) {
+  const rows = new Map()
+  for (const m of members) {
+    rows.set(m.id, {
+      memberId: m.id,
+      memberName: m.name,
+      events: 0,
+      consumed: 0,
+      discarded: 0,
+    })
+  }
+  for (const e of events) {
+    const key = e.memberId ?? `name:${e.memberName ?? 'Unattributed'}`
+    const row = rows.get(key) ?? {
+      memberId: e.memberId ?? null,
+      memberName: e.memberName ?? 'Unattributed',
+      events: 0,
+      consumed: 0,
+      discarded: 0,
+    }
+    row.events += 1
+    if (e.eventType === 'consumed') row.consumed += e.quantity
+    if (e.eventType === 'discarded') row.discarded += e.quantity
+    rows.set(key, row)
+  }
+  return [...rows.values()].sort((a, b) => b.events - a.events)
+}

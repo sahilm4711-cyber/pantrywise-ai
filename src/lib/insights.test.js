@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { computeInsights } from './insights.js'
+import { computeInsights, computeMemberStats } from './insights.js'
 
 function event(overrides = {}) {
   return {
@@ -66,4 +66,33 @@ test('empty event log yields zeros without trends', () => {
   assert.equal(insights.consumedTotal, 0)
   assert.equal(insights.discardedTotal, 0)
   assert.deepEqual(insights.byCategory, [])
+})
+
+// P2 — FR-15 member stats.
+test('computeMemberStats joins members and snapshots', () => {
+  const members = [
+    { id: 'm1', name: 'Priya' },
+    { id: 'm2', name: 'Rohan' },
+  ]
+  const events = [
+    event({ id: 'e1', memberId: 'm1', memberName: 'Priya', quantity: 1 }),
+    event({
+      id: 'e2',
+      memberId: 'm1',
+      memberName: 'Priya',
+      eventType: 'discarded',
+      quantity: 0.5,
+    }),
+    event({ id: 'e3', memberId: null, memberName: null, quantity: 2 }),
+  ]
+  const stats = computeMemberStats(events, members)
+  assert.equal(stats.length, 3)
+  const priya = stats.find((s) => s.memberName === 'Priya')
+  assert.equal(priya.events, 2)
+  assert.equal(priya.consumed, 1)
+  assert.equal(priya.discarded, 0.5)
+  const rohan = stats.find((s) => s.memberName === 'Rohan')
+  assert.equal(rohan.events, 0)
+  const unattributed = stats.find((s) => s.memberName === 'Unattributed')
+  assert.equal(unattributed.events, 1)
 })

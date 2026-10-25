@@ -8,7 +8,7 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "node --test src/lib/riskEngine.test.js src/lib/store.test.js src/lib/seed.test.js src/lib/ranking.test.js src/lib/explain.test.js src/lib/units.test.js src/lib/duplicates.test.js src/lib/recommend.test.js src/lib/shopping.test.js src/lib/metrics.test.js src/lib/flow.test.js src/lib/insights.test.js"
+    "test": "node --test src/lib/riskEngine.test.js src/lib/store.test.js src/lib/seed.test.js src/lib/ranking.test.js src/lib/explain.test.js src/lib/units.test.js src/lib/duplicates.test.js src/lib/recommend.test.js src/lib/shopping.test.js src/lib/metrics.test.js src/lib/flow.test.js src/lib/insights.test.js src/lib/receipt.test.js src/lib/retailer.test.js src/lib/mealIdeas.test.js"
   },
   "dependencies": {
     "react": "^19.3.1",

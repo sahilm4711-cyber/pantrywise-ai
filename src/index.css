@@ -416,3 +416,13 @@ body {
   padding: 0.4rem 0.5rem;
   border-bottom: 1px solid #e5e7eb;
 }
+
+/* P2 — Import textareas (FR-14/FR-16). */
+textarea {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font: inherit;
+  box-sizing: border-box;
+}

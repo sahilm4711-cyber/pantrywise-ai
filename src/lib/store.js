@@ -80,6 +80,11 @@ function emptyState() {
     // Cleared only by clearAll; manual edits keep the label, since the
     // dataset is still the demo one, edited.
     demo: false,
+    // FR-15 (P2): household members sharing this one on-device
+    // inventory. Multi-household sync is out of scope per the PRD, so
+    // members are profiles on this device, not accounts.
+    members: [],
+    activeMemberId: null,
   }
 }
 
@@ -103,6 +108,19 @@ function loadFrom(storage) {
         items: parsed.items,
         events: parsed.events,
         shoppingList: parsed.shoppingList,
+        members: Array.isArray(parsed.members)
+          ? parsed.members.filter(
+              (m) =>
+                m &&
+                typeof m === 'object' &&
+                typeof m.id === 'string' &&
+                typeof m.name === 'string',
+            )
+          : [],
+        activeMemberId:
+          typeof parsed.activeMemberId === 'string'
+            ? parsed.activeMemberId
+            : null,
         // States saved before the flag existed are recognised by the
         // seed items' id prefix (manual items get random UUIDs, never
         // "seed-"), so the label survives the upgrade.
@@ -308,8 +326,28 @@ export function createStore(storage = defaultStorage()) {
         events: seed.events,
         shoppingList: seed.shoppingList,
         demo: true,
+        members: [],
+        activeMemberId: null,
       })
       return state
+    },
+
+    // FR-15 (P2): household members. Events log under the active
+    // member, so the Insights tab can show who used what.
+    addMember(name) {
+      const clean = typeof name === 'string' ? name.trim() : ''
+      if (clean === '') return { ok: false, error: 'Name is required.' }
+      const member = { id: generateId(), name: clean }
+      setState({ ...state, members: [...state.members, member] })
+      return { ok: true, member }
+    },
+
+    setActiveMember(id) {
+      if (id !== null && !state.members.some((m) => m.id === id)) {
+        return { ok: false, error: 'Member not found.' }
+      }
+      setState({ ...state, activeMemberId: id })
+      return { ok: true }
     },
 
     clearAll() {
@@ -385,6 +423,19 @@ export function createStore(storage = defaultStorage()) {
         events: parsed.events,
         shoppingList: parsed.shoppingList,
         demo: parsed.demo === true,
+        members: Array.isArray(parsed.members)
+          ? parsed.members.filter(
+              (m) =>
+                m &&
+                typeof m === 'object' &&
+                typeof m.id === 'string' &&
+                typeof m.name === 'string',
+            )
+          : [],
+        activeMemberId:
+          typeof parsed.activeMemberId === 'string'
+            ? parsed.activeMemberId
+            : null,
       })
       return {
         ok: true,
@@ -427,6 +478,11 @@ export function createStore(storage = defaultStorage()) {
         status = remaining === 0 ? event.eventType : 'partially consumed'
       }
       const updated = { ...item, quantityRemaining: remaining, status }
+      // FR-15 (P2): attribute the event to the active household member.
+      // The name is snapshotted so renames and removals never rewrite
+      // history; null when nobody is active.
+      const activeMember =
+        state.members.find((m) => m.id === state.activeMemberId) ?? null
       const entry = {
         id: generateId(),
         itemId: item.id,
@@ -434,6 +490,8 @@ export function createStore(storage = defaultStorage()) {
         eventType: event.eventType,
         quantity,
         timestamp,
+        memberId: activeMember ? activeMember.id : null,
+        memberName: activeMember ? activeMember.name : null,
       }
       setState({
         ...state,
