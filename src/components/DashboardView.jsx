@@ -3,6 +3,7 @@ import { useSyncExternalStore } from 'react'
 import { todayKey } from '../lib/dates.js'
 import { reasonText, templateExplanation } from '../lib/explain.js'
 import { computeMetrics } from '../lib/metrics.js'
+import MealIdeasSection from './MealIdeasSection.jsx'
 import { scoreAllItems } from '../lib/ranking.js'
 import { recommendAll } from '../lib/recommend.js'
 
@@ -252,6 +253,8 @@ export default function DashboardView({ store }) {
           </ul>
         </section>
       )}
+      {/* FR-17 (P2): hidden while no meal-ideas endpoint is configured. */}
+      <MealIdeasSection items={result.useSoon.slice(0, 3)} endpoint={null} />
     </div>
   )
 }

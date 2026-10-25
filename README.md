@@ -64,9 +64,14 @@ Demo walkthrough for the judges: see **DEMO.md**.
    insights (empty state below 5 events, trends at 5+), FR-12 JSON
    export/restore (verbatim round-trip), FR-13 receipt-ready data model
    (source/externalId on every item, preserved through import).
-9. **P2 — Nice to Have** (pending): FR-14 receipt import, FR-15
-   household sharing (single household, on-device), FR-16 retailer
-   integration, FR-17 meal ideas (LLM hook, hidden when disabled).
+9. **P2 — Nice to Have** (done): FR-14 receipt import (deterministic
+   parser, sample receipt, flagged uncertain fields, confirm before
+   saving), FR-15 household sharing (member profiles on this device,
+   events attributed to the active member; no cross-device sync, which
+   the PRD leaves out of scope), FR-16 retailer integration (JSON
+   history import, externalId dedup), FR-17 meal ideas (LLM hook with
+   names-and-quantities-only payload and 3 s timeout; control hidden
+   while no endpoint is configured, so nothing appears yet).
 
 A module is done only when its PRD acceptance criteria pass. Report actual
 test results, including failures — never claim a feature works unverified.

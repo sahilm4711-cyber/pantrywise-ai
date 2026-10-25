@@ -244,3 +244,43 @@ test('FR-13: a JSON import with populated source/externalId round-trips unchange
   assert.equal(target.getState().items[0].source, 'receipt')
   assert.equal(target.getState().items[0].externalId, 'rcpt-42')
 })
+
+// P2 — FR-15 household members.
+test('FR-15: events log under the active member', () => {
+  const store = createStore(createMemoryStorage())
+  const member = store.addMember('Priya')
+  assert.equal(member.ok, true)
+  assert.equal(store.setActiveMember(member.member.id).ok, true)
+  const added = store.addItem(ITEM)
+  const logged = store.logEvent({
+    itemId: added.item.id,
+    eventType: 'consumed',
+    quantity: 0.5,
+  })
+  assert.equal(logged.event.memberId, member.member.id)
+  assert.equal(logged.event.memberName, 'Priya')
+})
+
+test('FR-15: no active member means unattributed events; unknown member rejected', () => {
+  const store = createStore(createMemoryStorage())
+  const added = store.addItem(ITEM)
+  const logged = store.logEvent({
+    itemId: added.item.id,
+    eventType: 'consumed',
+    quantity: 0.5,
+  })
+  assert.equal(logged.event.memberId, null)
+  assert.equal(logged.event.memberName, null)
+  assert.equal(store.setActiveMember('nope').ok, false)
+  assert.equal(store.addMember('  ').ok, false)
+})
+
+test('FR-15: members survive a JSON export/import round-trip', () => {
+  const source = createStore(createMemoryStorage())
+  const member = source.addMember('Priya')
+  source.setActiveMember(member.member.id)
+  const target = createStore(createMemoryStorage())
+  assert.equal(target.importJSON(source.exportJSON()).ok, true)
+  assert.equal(target.getState().members.length, 1)
+  assert.equal(target.getState().activeMemberId, member.member.id)
+})
