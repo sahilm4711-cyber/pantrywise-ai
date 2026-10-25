@@ -309,3 +309,45 @@ describe('priors (§6.3)', () => {
     assert.equal(getShelfLifePrior('No such category'), null)
   })
 })
+
+describe('FR-10 confidence labels (P1)', () => {
+  it('Known expiry + learned daily use → High confidence', () => {
+    const events = [
+      { itemId: 'milk-1', category: 'Milk / dairy', eventType: 'consumed', quantity: 0.5, timestamp: '2026-10-20' },
+      { itemId: 'milk-1', category: 'Milk / dairy', eventType: 'consumed', quantity: 0.5, timestamp: '2026-10-22' },
+      { itemId: 'milk-1', category: 'Milk / dairy', eventType: 'consumed', quantity: 0.5, timestamp: '2026-10-24' },
+    ]
+    const r = scoreItem(milk({ averageDailyUse: undefined, events }), TODAY)
+    assert.equal(r.status, 'scored')
+    assert.equal(r.dailyUseSource, 'Learned')
+    assert.equal(r.confidence, 'High confidence')
+  })
+
+  it('Known expiry + category prior daily use → Partial', () => {
+    const r = scoreItem(
+      milk({ averageDailyUse: undefined }),
+      TODAY,
+      { categoryDailyUsePriors: { 'Milk / dairy': 0.5 } },
+    )
+    assert.equal(r.dailyUseSource, 'Prior')
+    assert.equal(r.confidence, 'Partial')
+  })
+
+  it('Estimated expiry + user-entered daily use → Partial', () => {
+    const r = scoreItem(
+      milk({ expiryDate: undefined, purchaseDate: '2026-10-23' }),
+      TODAY,
+    )
+    assert.equal(r.expiryConfidence, 'Estimated (prior)')
+    assert.equal(r.dailyUseSource, 'User')
+    assert.equal(r.confidence, 'Partial')
+  })
+
+  it('no dates at all → insufficient-data (UI renders "Insufficient")', () => {
+    const r = scoreItem(
+      milk({ expiryDate: undefined, purchaseDate: undefined }),
+      TODAY,
+    )
+    assert.equal(r.status, 'insufficient-data')
+  })
+})

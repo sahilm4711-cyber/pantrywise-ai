@@ -403,3 +403,16 @@ body {
   flex: 1;
   min-width: 0;
 }
+
+/* P1 — Insights table (FR-11). */
+.insights-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.insights-table th,
+.insights-table td {
+  text-align: left;
+  padding: 0.4rem 0.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}

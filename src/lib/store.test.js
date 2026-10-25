@@ -193,3 +193,54 @@ test('demo flag: fresh stores are not demo, seedDemo marks demo', () => {
   store.seedDemo('2026-10-24')
   assert.equal(store.getState().demo, true)
 })
+
+// P1 — FR-12 export/restore and FR-13 round-trip.
+test('FR-12: export count equals visible inventory count, fields match', () => {
+  const store = createStore(createMemoryStorage())
+  store.addItem(ITEM)
+  store.addItem({ ...ITEM, name: 'Bread', category: 'Bread', unit: 'pieces' })
+  const exported = JSON.parse(store.exportJSON())
+  assert.equal(exported.items.length, store.getState().items.length)
+  assert.deepEqual(exported.items, store.getState().items)
+  assert.deepEqual(exported.events, store.getState().events)
+})
+
+test('FR-12: importing an export into an empty store restores items and events', () => {
+  const source = createStore(createMemoryStorage())
+  const added = source.addItem(ITEM)
+  source.logEvent({
+    itemId: added.item.id,
+    eventType: 'consumed',
+    quantity: 0.5,
+  })
+  const exported = source.exportJSON()
+  const target = createStore(createMemoryStorage())
+  const res = target.importJSON(exported)
+  assert.equal(res.ok, true)
+  assert.equal(res.imported.items, 1)
+  assert.equal(res.imported.events, 1)
+  assert.deepEqual(target.getState().items, source.getState().items)
+  assert.deepEqual(target.getState().events, source.getState().events)
+})
+
+test('FR-12: invalid JSON and bad shapes are rejected without touching state', () => {
+  const store = createStore(createMemoryStorage())
+  store.addItem(ITEM)
+  assert.equal(store.importJSON('not json').ok, false)
+  assert.equal(store.importJSON('{"items": "x"}').ok, false)
+  assert.equal(store.importJSON('{"items": [], "events": []}').ok, false)
+  assert.equal(store.getState().items.length, 1)
+})
+
+test('FR-13: a JSON import with populated source/externalId round-trips unchanged', () => {
+  const source = createStore(createMemoryStorage())
+  source.addItem(ITEM)
+  const parsed = JSON.parse(source.exportJSON())
+  parsed.items[0].source = 'receipt'
+  parsed.items[0].externalId = 'rcpt-42'
+  const target = createStore(createMemoryStorage())
+  const res = target.importJSON(JSON.stringify(parsed))
+  assert.equal(res.ok, true)
+  assert.equal(target.getState().items[0].source, 'receipt')
+  assert.equal(target.getState().items[0].externalId, 'rcpt-42')
+})

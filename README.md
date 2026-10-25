@@ -59,6 +59,14 @@ Demo walkthrough for the judges: see **DEMO.md**.
    recommendations with reason codes.
 7. **Module 6 — Demo polish** (done): demo-data labelling, damaged-data
    banner, end-to-end flow test, DEMO.md walkthrough, P0 verification.
+8. **P1 — Should Have** (done): FR-10 confidence labels locked in
+   (High/Partial/Insufficient, from provenance), FR-11 historical
+   insights (empty state below 5 events, trends at 5+), FR-12 JSON
+   export/restore (verbatim round-trip), FR-13 receipt-ready data model
+   (source/externalId on every item, preserved through import).
+9. **P2 — Nice to Have** (pending): FR-14 receipt import, FR-15
+   household sharing (single household, on-device), FR-16 retailer
+   integration, FR-17 meal ideas (LLM hook, hidden when disabled).
 
 A module is done only when its PRD acceptance criteria pass. Report actual
 test results, including failures — never claim a feature works unverified.

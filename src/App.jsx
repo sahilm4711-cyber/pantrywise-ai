@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import DashboardView from './components/DashboardView.jsx'
+import InsightsView from './components/InsightsView.jsx'
 import InventoryView from './components/InventoryView.jsx'
 import ShoppingView from './components/ShoppingView.jsx'
 import { store } from './lib/storeInstance.js'
@@ -8,6 +9,7 @@ const VIEWS = [
   { id: 'dashboard', label: 'Dashboard', module: 'Module 5' },
   { id: 'inventory', label: 'Inventory', module: 'Module 2' },
   { id: 'shopping', label: 'Shopping List', module: 'Module 4' },
+  { id: 'insights', label: 'Insights', module: 'P1' },
 ]
 
 // Source of truth: PRD v1.3 (VisionX build copy, submitted for Round 1).
@@ -52,6 +54,8 @@ export default function App() {
           <DashboardView store={store} />
         ) : view === 'shopping' ? (
           <ShoppingView store={store} />
+        ) : view === 'insights' ? (
+          <InsightsView store={store} />
         ) : (
           <section className="card">
             <h2>{current.label}</h2>
