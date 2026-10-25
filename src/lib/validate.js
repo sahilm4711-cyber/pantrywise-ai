@@ -47,6 +47,15 @@ export function validateItemInput(input) {
     rawUse === undefined || rawUse === null || rawUse === ''
       ? null
       : toNumber(rawUse)
+  // FR-13 (P1): receipt-ready fields. Both optional; a missing source
+  // means a manual item, a missing externalId means no outside record.
+  // The store defaults them, the validator only normalizes them, so
+  // imports (FR-12/FR-14/FR-16) can carry real values through.
+  const source = cleanString(input.source) === '' ? 'manual' : cleanString(input.source)
+  const externalId =
+    typeof input.externalId === 'string' && input.externalId.trim() !== ''
+      ? input.externalId.trim()
+      : null
 
   if (name === '') errors.name = 'Name is required.'
   if (category === '') errors.category = 'Category is required.'
@@ -85,6 +94,8 @@ export function validateItemInput(input) {
       purchaseDate,
       expiryDate,
       averageDailyUse,
+      source,
+      externalId,
     },
   }
 }

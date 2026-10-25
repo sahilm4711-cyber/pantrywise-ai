@@ -273,6 +273,51 @@ export default function InventoryView({ store }) {
           <button type="button" className="btn btn-danger" onClick={handleClear}>
             Clear all
           </button>
+          <button
+            type="button"
+            className="btn"
+            onClick={() => {
+              const blob = new Blob([store.exportJSON()], {
+                type: 'application/json',
+              })
+              const url = URL.createObjectURL(blob)
+              const a = document.createElement('a')
+              a.href = url
+              a.download = 'pantrywise-ai-export.json'
+              a.click()
+              URL.revokeObjectURL(url)
+              setNotice('Inventory exported as JSON.')
+            }}
+          >
+            Export JSON
+          </button>
+          <label className="btn">
+            Import JSON
+            <input
+              type="file"
+              accept="application/json,.json"
+              hidden
+              onChange={async (e) => {
+                const file = e.target.files[0]
+                if (!file) return
+                const text = await file.text()
+                e.target.value = ''
+                if (
+                  !window.confirm(
+                    'Replace the current inventory with the imported file?',
+                  )
+                ) {
+                  return
+                }
+                const res = store.importJSON(text)
+                setNotice(
+                  res.ok
+                    ? `Imported ${res.imported.items} items, ${res.imported.events} events, ${res.imported.shoppingList} list items.`
+                    : res.error,
+                )
+              }}
+            />
+          </label>
         </div>
         {notice && <p className="hint">{notice}</p>}
         {state.items.length === 0 ? (

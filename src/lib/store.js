@@ -190,8 +190,8 @@ export function createStore(storage = defaultStorage()) {
         expiryDate: value.expiryDate,
         averageDailyUse: value.averageDailyUse,
         status: 'active',
-        source: 'manual',
-        externalId: null,
+        source: value.source,
+        externalId: value.externalId,
       }
       setState({ ...state, items: [...state.items, item] })
       return { ok: true, item }
@@ -216,6 +216,8 @@ export function createStore(storage = defaultStorage()) {
         purchaseDate: value.purchaseDate,
         expiryDate: value.expiryDate,
         averageDailyUse: value.averageDailyUse,
+        source: value.source,
+        externalId: value.externalId,
         status: statusFor(value.quantity, remaining),
       }
       setState({
@@ -312,6 +314,86 @@ export function createStore(storage = defaultStorage()) {
 
     clearAll() {
       setState(emptyState())
+    },
+
+    // FR-12 (P1): export the whole state as JSON. The exported items
+    // array is the visible inventory, field for field — including the
+    // FR-13 source/externalId values, which is what makes the FR-13
+    // round-trip work.
+    exportJSON() {
+      return JSON.stringify(state)
+    },
+
+    // FR-12 (P1): restore a previously exported file. Shape-checked,
+    // not version-gated, so older exports still load; items, events,
+    // and list entries are stored verbatim (ids, statuses, sources,
+    // externalIds included) — nothing is re-derived or dropped. A bad
+    // file is rejected without touching the current state.
+    importJSON(text) {
+      let parsed
+      try {
+        parsed = JSON.parse(text)
+      } catch {
+        return { ok: false, error: 'That file is not valid JSON.' }
+      }
+      const bad = (why) => ({ ok: false, error: why })
+      if (!parsed || typeof parsed !== 'object') return bad('Bad export format.')
+      if (!Array.isArray(parsed.items)) return bad('Bad export format: items.')
+      if (!Array.isArray(parsed.events)) return bad('Bad export format: events.')
+      if (!Array.isArray(parsed.shoppingList)) {
+        return bad('Bad export format: shoppingList.')
+      }
+      const itemOk = (it) =>
+        it &&
+        typeof it === 'object' &&
+        typeof it.id === 'string' &&
+        typeof it.name === 'string' &&
+        it.name.trim() !== '' &&
+        typeof it.category === 'string' &&
+        it.category.trim() !== '' &&
+        typeof it.unit === 'string' &&
+        it.unit.trim() !== '' &&
+        Number.isFinite(it.quantity) &&
+        it.quantity > 0 &&
+        Number.isFinite(it.quantityRemaining) &&
+        it.quantityRemaining >= 0
+      const eventOk = (e) =>
+        e &&
+        typeof e === 'object' &&
+        typeof e.itemId === 'string' &&
+        EVENT_TYPES.includes(e.eventType) &&
+        Number.isFinite(e.quantity) &&
+        e.quantity > 0 &&
+        typeof e.timestamp === 'string'
+      const listOk = (li) =>
+        li &&
+        typeof li === 'object' &&
+        typeof li.name === 'string' &&
+        li.name.trim() !== '' &&
+        Number.isFinite(li.quantityWanted) &&
+        li.quantityWanted > 0 &&
+        typeof li.unit === 'string' &&
+        li.unit.trim() !== ''
+      if (!parsed.items.every(itemOk)) return bad('Bad export format: item.')
+      if (!parsed.events.every(eventOk)) return bad('Bad export format: event.')
+      if (!parsed.shoppingList.every(listOk)) {
+        return bad('Bad export format: list item.')
+      }
+      setState({
+        schemaVersion: SCHEMA_VERSION,
+        items: parsed.items,
+        events: parsed.events,
+        shoppingList: parsed.shoppingList,
+        demo: parsed.demo === true,
+      })
+      return {
+        ok: true,
+        imported: {
+          items: parsed.items.length,
+          events: parsed.events.length,
+          shoppingList: parsed.shoppingList.length,
+        },
+      }
     },
 
     logEvent(event) {

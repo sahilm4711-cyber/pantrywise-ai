@@ -244,7 +244,7 @@ export default function DashboardView({ store }) {
                 <div>
                   <div className="item-name">{entry.item.name}</div>
                   <div className="item-meta">
-                    Needs: {missingText(entry.missing)}
+                    Insufficient · Needs: {missingText(entry.missing)}
                   </div>
                 </div>
               </li>
