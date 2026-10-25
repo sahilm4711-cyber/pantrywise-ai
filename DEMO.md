@@ -87,7 +87,7 @@ immediately — try it."
 - Cover thresholds: Skip ≥ 7 days, Buy less 3–7 days, Keep < 3 days.
 - Latency: 200-item recompute < 500 ms; first render < 2 s (local,
   no backend calls — everything is localStorage).
-- Tests: `npm test` — 90+ node:test tests, zero dependencies added.
+- Tests: `npm test` — 127 node:test tests, zero dependencies added.
 
 ## Honesty notes (for Q&A — do not overclaim)
 
@@ -108,7 +108,7 @@ immediately — try it."
   That restores the exact seeded state.
 - App will not start → `npm install`, then `npm run dev` again.
 - A page looks empty → check the tab (Dashboard / Inventory / Shopping
-  List) — each tab owns one part of the flow above.
+  List / Insights / Import) — each tab owns one part of the flow above.
 - Saved data damaged → the app shows a banner and starts empty rather
   than crashing. Reload demo data to continue.
 
@@ -125,3 +125,19 @@ immediately — try it."
 | FR-07 Demo dataset | Load demo data | 40 items, 5 list items, 9 categories |
 | FR-08 Expiry estimation | Tomatoes card | "Estimated (prior)", never as known |
 | FR-09 Learning loop | Curd card | "Learned (3 events)", 0.5/day |
+
+## Beyond P0 (FR-10–FR-17, all built)
+
+Use these only if the judges ask "what came after P0" — the 90-second
+script above still stands on its own.
+
+| FR | Demo moment (30 seconds each) |
+|---|---|
+| FR-10 Confidence labels | Every scored card shows High confidence or Partial from its provenance; **Salt** under Needs information now reads "Insufficient". |
+| FR-11 Historical insights | **Insights** tab: on the seed it shows the empty state (3 events). Log 2 more Used/Discarded events and the trends appear — totals plus a per-category table. |
+| FR-12 Export/restore | **Inventory → Export JSON**, then **Clear all**, then **Import JSON** with that file: items, events, and list come back exactly. |
+| FR-13 Receipt-ready model | Not demoed alone — it shows through FR-16: imported lines keep their retailer `externalId`, which is what makes the dedup work. |
+| FR-14 Receipt import | **Import** tab → **Use sample receipt → Parse receipt**: 6 items, with Bread's unit flagged. Fill the flagged units, **Confirm**, and all 6 land in inventory (left blank, those lines are skipped and counted). |
+| FR-15 Household sharing | **Insights → Household**: add a member, set them active, log an event on Inventory — the member table attributes it to them. On-device only: no cross-device sync, which the PRD leaves out of scope. |
+| FR-16 Retailer integration | **Import** tab → **Use sample history → Parse history → Confirm**: 3 items added. Parse the same history again: 1 new, 2 already imported — re-imports never duplicate stock. |
+| FR-17 Meal ideas | Do NOT demo this as a feature. The hook is built (top-3 High items, names and quantities only, 3 s timeout), but no endpoint is connected, so the control is hidden by design — exactly as the PRD specifies. |
